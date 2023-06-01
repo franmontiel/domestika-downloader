@@ -1,16 +1,19 @@
-const puppeteer = require('puppeteer');
-const cheerio = require('cheerio');
-const util = require('util');
-const exec = util.promisify(require('child_process').exec);
-const m3u8ToMp4 = require('m3u8-to-mp4');
-const fs = require('fs');
+
+import puppeteer from 'puppeteer';
+import cheerio from 'cheerio';
+import { promisify } from 'util';
+import { exec as execCb } from 'child_process';
+import m3u8ToMp4 from 'm3u8-to-mp4';
+import fs from 'fs';
+import fetch from 'node-fetch';
+import { exec } from 'child_process';
 const converter = new m3u8ToMp4();
 
 const debug = false;
 const debug_data = [];
 
 const course_url = '';
-const subtitle_lang = 'en';
+const subtitle_lang = 'es';
 
 //Cookie used to retreive video information
 const cookies = [
@@ -32,6 +35,7 @@ if (fs.existsSync('N_m3u8DL-RE.exe')) {
 }
 
 async function scrapeSite() {
+    console.log(course_url);
     //Scrape site for links to videos
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -92,8 +96,10 @@ async function scrapeSite() {
                 fs.mkdirSync(`domestika_courses/${title}/${unit.title}/`, { recursive: true });
             }
 
-            let log = await exec(`N_m3u8DL-RE -sv res="1080*":codec=hvc1:for=best "${vData.playbackURL}" --save-dir "domestika_courses/${title}/${unit.title}" --save-name "${a}_${vData.title}"`);
-            let log2 = await exec(`N_m3u8DL-RE --auto-subtitle-fix --sub-format SRT --select-subtitle lang="${subtitle_lang}":for=all "${vData.playbackURL}" --save-dir "domestika_courses/${title}/${unit.title}" --save-name "${a}_${vData.title}"`);
+            // console.log(`./N_m3u8DL-RE.exe -sv res="1080*":codec=hvc1:for=best "${vData.playbackURL}" --save-dir "domestika_courses/${title}/${unit.title}" --save-name "${a}_${vData.title}"`);
+
+            let log = await exec(`./N_m3u8DL-RE.exe -sv res="1080*":codec=hvc1:for=best "${vData.playbackURL}" --save-dir "domestika_courses/${title}/${unit.title}" --save-name "${a}_${vData.title}"`);
+            let log2 = await exec(`./N_m3u8DL-RE.exe --auto-subtitle-fix --sub-format SRT --select-subtitle lang="${subtitle_lang}":for=all "${vData.playbackURL}" --save-dir "domestika_courses/${title}/${unit.title}" --save-name "${a}_${vData.title}"`);
 
             if (debug) {
                 debug_data.push({
